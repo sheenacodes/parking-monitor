@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   rabbitmq:
@@ -7,11 +7,19 @@ services:
     ports:
       - "5672:5672"   # RabbitMQ
       - "15672:15672" # Management Plugin
-    environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+    #environment:
+      #RABBITMQ_DEFAULT_USER: user
+      #RABBITMQ_DEFAULT_PASS: password
+      #RABBITMQ_DEFINITIONS: /etc/rabbitmq/definitions.json
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_logs:/var/log/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      #- ./rabbitmq/init-rabbitmq.sh:/docker-entrypoint-init.d/init-rabbitmq.sh
+    entrypoint: ["docker-entrypoint.sh"]
+    command: ["rabbitmq-server"]
 
 volumes:
   rabbitmq_data:
+  rabbitmq_logs:

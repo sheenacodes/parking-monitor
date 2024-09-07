@@ -1,0 +1,38 @@
+{
+    "users": [
+        {
+            "name": "user",
+            "password": "password",
+            "tags": "administrator"
+        }
+    ],
+    "queues": [
+        {
+            "name": "queue2",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {},
+            "vhost": "/"
+        },
+        {
+            "name": "queue1",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {},
+            "vhost": "/"
+        }
+    ],
+    "exchanges": [],
+    "bindings": [],
+    "users": [],
+    "vhosts": [
+        {
+            "name": "/",
+            "tracing": false
+        }
+    ],
+    "permissions": [],
+    "policies": [],
+    "parameters": [],
+    "global_parameters": []
+}
