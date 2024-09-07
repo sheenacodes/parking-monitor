@@ -24,14 +24,21 @@
     ],
     "exchanges": [],
     "bindings": [],
-    "users": [],
     "vhosts": [
         {
             "name": "/",
             "tracing": false
         }
     ],
-    "permissions": [],
+    "permissions": [
+    {
+      "user": "user",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
     "policies": [],
     "parameters": [],
     "global_parameters": []

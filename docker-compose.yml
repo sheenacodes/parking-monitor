@@ -23,31 +23,54 @@ services:
     networks:
       - rabbitmq_network
 
-  generator:
+  entry_generator:
     build:
       context: ./generator/
       dockerfile: Dockerfile
-    container_name: generator
+    container_name: entrygenerator
     depends_on:
       - rabbitmq
+      - redis
     environment:
       - LOG_LEVEL=DEBUG
       - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+      - GENERATOR_MODE=entry
+      - REDIS_PASSWORD=your_redis_password
+      - REDIS_ADDR=redis:6379
+      - REDIS_DB=0
     networks:
       - rabbitmq_network
 
-  # redis:
-  #   image: redis:7.4
-  #   container_name: redis
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-  #   command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-  #   environment:
-  #     - REDIS_PASSWORD=your_redis_password # Set Redis password
-  #   networks:
-  #     - redis_network
+  exit_generator:
+    build:
+      context: ./generator/
+      dockerfile: Dockerfile
+    container_name: exitgenerator
+    depends_on:
+      - rabbitmq
+      - redis
+    environment:
+      - LOG_LEVEL=DEBUG
+      - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+      - GENERATOR_MODE=exit
+      - REDIS_PASSWORD=your_redis_password
+      - REDIS_ADDR=redis:6379
+      - REDIS_DB=0
+    networks:
+      - rabbitmq_network
+
+  redis:
+    image: redis:7.4
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    environment:
+      - REDIS_PASSWORD=your_redis_password # Set Redis password
+    networks:
+      - rabbitmq_network
 
 networks:
   # redis_network:
