@@ -74,28 +74,4 @@ venv.bak/
 *.coverprofile
 *.cover.out
 
-# Go modules
-vendor/
-*.mod
-*.sum
-
-# Go workspace file
-go.work
-go.work.sum
-
-# -----------------------------------------------------------------------------
-# Docker
-# -----------------------------------------------------------------------------
-
-# Local docker volumes
-volumes/
-
-# Docker build and runtime artifacts
-**/*.dockerfile
-docker-compose*.yaml
-**/Dockerfile*
-**/compose-*.yaml
-*.tar
-*.log
-
 

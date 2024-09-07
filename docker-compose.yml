@@ -20,22 +20,39 @@ services:
       #- ./rabbitmq/init-rabbitmq.sh:/docker-entrypoint-init.d/init-rabbitmq.sh
     entrypoint: ["docker-entrypoint.sh"]
     command: ["rabbitmq-server"]
-
-  redis:
-    image: redis:7.4
-    container_name: redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    environment:
-      - REDIS_PASSWORD=your_redis_password # Set Redis password
     networks:
-      - redis_network
+      - rabbitmq_network
+
+  generator:
+    build:
+      context: ./generator/
+      dockerfile: Dockerfile
+    container_name: generator
+    depends_on:
+      - rabbitmq
+    environment:
+      - LOG_LEVEL=DEBUG
+      - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+    networks:
+      - rabbitmq_network
+
+  # redis:
+  #   image: redis:7.4
+  #   container_name: redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+  #   command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+  #   environment:
+  #     - REDIS_PASSWORD=your_redis_password # Set Redis password
+  #   networks:
+  #     - redis_network
 
 networks:
-  redis_network:
+  # redis_network:
+  #   driver: bridge
+  rabbitmq_network:
     driver: bridge
 
 volumes:
