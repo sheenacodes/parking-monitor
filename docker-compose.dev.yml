@@ -93,6 +93,21 @@ services:
     networks:
       - rabbitmq_network
 
+  python-server:
+    build:
+      context: ./services/api-server
+    container_name: api
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - FILENAME=/logs/log.txt
+    volumes:
+       - ./parkinglogs:/logs
+    networks:
+       - rabbitmq_network
+
+
   redis:
     image: redis:7.4
     container_name: redis

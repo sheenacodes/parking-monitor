@@ -1,0 +1,12 @@
+GET http://127.0.0.1:8000/
+
+###
+POST http://127.0.0.1:8000/parkinglog
+Content-Type: application/json
+
+{
+   "vehicle_plate":"ggg44",
+   "entry_date_time":"1",
+   "exit_date_time":"1",
+   "duration":"1"
+}
