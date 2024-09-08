@@ -8,14 +8,14 @@
     ],
     "queues": [
         {
-            "name": "queue2",
+            "name": "vehicle_entries",
             "durable": true,
             "auto_delete": false,
             "arguments": {},
             "vhost": "/"
         },
         {
-            "name": "queue1",
+            "name": "vehicle_exits",
             "durable": true,
             "auto_delete": false,
             "arguments": {},

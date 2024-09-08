@@ -25,7 +25,7 @@ services:
 
   entry_generator:
     build:
-      context: ./parking-simulator/
+      context: ./services/parking-simulator/
       dockerfile: Dockerfile.dev
     container_name: entrygenerator
     depends_on:
@@ -34,6 +34,7 @@ services:
     environment:
       - LOG_LEVEL=DEBUG
       - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+      - RABBITMQ_QUEUE_NAME=vehicle_entries
       - GENERATOR_MODE=entry
       - REDIS_PASSWORD=your_redis_password
       - REDIS_ADDR=redis:6379
@@ -48,7 +49,7 @@ services:
 
   exit_generator:
     build:
-      context: ./parking-simulator/
+      context: ./services/parking-simulator/
       dockerfile: Dockerfile.dev
     container_name: exitgenerator
     depends_on:
@@ -57,10 +58,34 @@ services:
     environment:
       - LOG_LEVEL=DEBUG
       - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+      - RABBITMQ_QUEUE_NAME=vehicle_exits
       - GENERATOR_MODE=exit
       - REDIS_PASSWORD=your_redis_password
       - REDIS_ADDR=redis:6379
       - REDIS_DB=0
+    volumes:
+      - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils  # Mount local shared utils
+    command: ["sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go"]
+
+    networks:
+      - rabbitmq_network
+
+  record_keeper:
+    build:
+      context: ./services/parking-record-keeper/
+      dockerfile: Dockerfile.dev
+    container_name: recordkeeper
+    depends_on:
+      - rabbitmq
+      - redis
+    environment:
+      - LOG_LEVEL=DEBUG
+      - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
+      - RABBITMQ_ENTRY_QUEUE_NAME=vehicle_entries
+      - RABBITMQ_EXIT_QUEUE_NAME=vehicle_exits
+      - REDIS_PASSWORD=your_redis_password
+      - REDIS_ADDR=redis:6379
+      - REDIS_DB=1
     volumes:
       - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils  # Mount local shared utils
     command: ["sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go"]
