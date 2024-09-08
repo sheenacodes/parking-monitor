@@ -1,4 +1,7 @@
 
+sharedutils/
+
+
 # Ignore Mac system files
 .DS_Store
 
@@ -55,23 +58,5 @@ env.bak/
 venv.bak/
 
 
-
-# -----------------------------------------------------------------------------
-# Go
-# -----------------------------------------------------------------------------
-
-# Binaries for programs and plugins
-*.exe
-*.dll
-*.so
-*.dylib
-
-# Test binary, build output
-*.test
-*.out
-
-# Output of the go coverage tool
-*.coverprofile
-*.cover.out
 
 
