@@ -1,4 +1,4 @@
-package redis_
+package redis
 
 import (
 	"context"
@@ -7,7 +7,13 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	// "github.com/rs/zerolog/log"
+)
+
+const (
+	maxRetries     = 5                // Maximum number of retries before giving up
+	initialBackoff = 2 * time.Second  // Initial delay before retrying
+	maxBackoff     = 30 * time.Second // Maximum delay between retries
+	redisSetName   = "vehicles_parked"
 )
 
 // RedisClient is a wrapper around the redis.Client to hold the instance
@@ -15,25 +21,8 @@ type RedisClient struct {
 	Client *redis.Client
 }
 
-// NewRedisClient initializes a new Redis client
-// func NewRedisClient(addr string, pword string, database int) *RedisClient {
-// 	rdb := redis.NewClient(&redis.Options{
-// 		Addr:     addr,
-// 		Password: pword,
-// 		DB:       database,
-// 	})
-
-// 	return &RedisClient{Client: rdb}
-// }
-
-const (
-	maxRetries     = 5                // Maximum number of retries before giving up
-	initialBackoff = 2 * time.Second  // Initial delay before retrying
-	maxBackoff     = 30 * time.Second // Maximum delay between retries
-)
-
 // Function to connect to Redis with retry and exponential backoff
-func connectToRedis(addr string, pword string, database int) (*RedisClient, error) {
+func GetRedisClient(addr string, pword string, database int) (*RedisClient, error) {
 	var client *redis.Client
 	var err error
 
@@ -43,7 +32,7 @@ func connectToRedis(addr string, pword string, database int) (*RedisClient, erro
 			Password: pword,
 			DB:       database,
 		})
-
+		logger.Log.Info().Msg(" connecting to Redis")
 		ctx := context.Background()
 		_, err = client.Ping(ctx).Result()
 		if err == nil {
@@ -68,10 +57,24 @@ func connectToRedis(addr string, pword string, database int) (*RedisClient, erro
 
 }
 
+func (r *RedisClient) IsSetNotEmpty() (bool, error) {
+	// Use the SCARD command to get the number of members in the set
+	ctx := context.Background()
+	card, err := r.Client.SCard(ctx, redisSetName).Result()
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("error checking set size")
+		return false, fmt.Errorf("error checking set size: %v", err)
+	}
+
+	logger.Log.Debug().Msgf("%d Vehicles in Redis Set", card)
+	// Return true if the number of members is greater than 0
+	return card > 0, nil
+}
+
 // AddVehicleEntry adds a vehicle entry to the Redis list of vehicles that have entered but not exited
 func (r *RedisClient) AddVehicleEntry(vehiclePlate string) error {
 	ctx := context.Background()
-	_, err := r.Client.SAdd(ctx, "vehicles_in_parking", vehiclePlate).Result()
+	_, err := r.Client.SAdd(ctx, redisSetName, vehiclePlate).Result()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to add vehicle entry to Redis")
 		return err
@@ -83,7 +86,7 @@ func (r *RedisClient) AddVehicleEntry(vehiclePlate string) error {
 // RemoveVehicleEntry removes a vehicle entry from the Redis list of vehicles that have entered
 func (r *RedisClient) RemoveVehicleEntry(vehiclePlate string) error {
 	ctx := context.Background()
-	_, err := r.Client.SRem(ctx, "vehicles_in_parking", vehiclePlate).Result()
+	_, err := r.Client.SRem(ctx, redisSetName, vehiclePlate).Result()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to remove vehicle entry from Redis")
 		return err
@@ -92,13 +95,13 @@ func (r *RedisClient) RemoveVehicleEntry(vehiclePlate string) error {
 	return nil
 }
 
-// VehicleExists checks if a vehicle has already entered
-func (r *RedisClient) VehicleExists(vehiclePlate string) (bool, error) {
+// GetRandomVehiclePlate retrieves a random vehicle plate from a Redis set
+func (r *RedisClient) GetRandomVehiclePlateFromParkedSet() (string, error) {
+	// Use SRANDMEMBER to get a random member from the set
 	ctx := context.Background()
-	exists, err := r.Client.SIsMember(ctx, "vehicles_in_parking", vehiclePlate).Result()
+	plate, err := r.Client.SRandMember(ctx, redisSetName).Result()
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to check vehicle existence in Redis")
-		return false, err
+		return "", fmt.Errorf("could not get random member from set: %w", err)
 	}
-	return exists, nil
+	return plate, nil
 }
