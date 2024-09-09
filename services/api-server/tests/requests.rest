@@ -5,7 +5,7 @@ POST http://127.0.0.1:8000/parkinglog
 Content-Type: application/json
 
 {
-   "vehicle_plate":"sla333",
+   "vehicle_plate":"dtw332",
    "entry_date_time":"12",
    "exit_date_time":"112",
    "duration":"1"

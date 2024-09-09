@@ -87,13 +87,13 @@ services:
     build:
       context: ./services/api-server
     container_name: api
-    # ports:
-    #   - "8000:8000"
+    ports:
+      - "8000:8000"
       #   environment:
       # - PORT=8000
       # - FILENAME=/project/log/log.txt
     volumes:
-      - data:/project/log
+      - ./parking_durations:/var/log
     networks:
       - rabbitmq_network
 
@@ -111,14 +111,12 @@ services:
       - rabbitmq_network
 
 networks:
-  # redis_network:
-  #   driver: bridge
   rabbitmq_network:
     driver: bridge
 
 volumes:
-  data:
   rabbitmq_data:
   rabbitmq_logs:
+  #parking_data:
 
 

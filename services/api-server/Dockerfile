@@ -7,15 +7,10 @@ RUN useradd -m -u 1000 appuser
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY ./app /project/app
-COPY ./log /project/log
-
-
-RUN ls -la /project  # Debugging step to list files
+COPY . /project/
 
 RUN chown -R appuser:appuser /project
-RUN chmod u+w /project/log/log.txt
-
+RUN  chmod 644 /project/log
 USER appuser
 
 CMD ["python", "-m", "app.main"]

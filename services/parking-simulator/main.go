@@ -48,12 +48,12 @@ func main() {
 			eventPayload := event.GenerateEntryEvent()
 			err := rabbitmq.PublishEvent(rabbitMQClient.Connection, cfg.QueueName, eventPayload)
 			if err != nil {
-				logger.Log.Fatal().Err(err).Msg("Failed to publish event")
+				logger.Log.Error().Err(err).Msg("Failed to publish event")
 			}
 
 			err = redisClient.AddItemToSet(eventPayload.VehiclePlate, redisSetName)
 			if err != nil {
-				logger.Log.Fatal().Err(err).Msg("Error adding vehicle to redis set")
+				logger.Log.Error().Err(err).Msg("Error adding vehicle to redis set")
 			} else {
 				logger.Log.Debug().Msg("Vehicle entry added to redis set successfully")
 			}
@@ -88,11 +88,11 @@ func main() {
 					eventPayload.VehiclePlate = parkedVehiclePlate
 					err = rabbitmq.PublishEvent(rabbitMQClient.Connection, cfg.QueueName, eventPayload)
 					if err != nil {
-						logger.Log.Fatal().Err(err).Msg("Failed to publish event")
+						logger.Log.Error().Err(err).Msg("Failed to publish event")
 					}
 					err = redisClient.RemoveItemFromSet(eventPayload.VehiclePlate, redisSetName)
 					if err != nil {
-						logger.Log.Fatal().Err(err).Msg("Error removing vehicle from redis set")
+						logger.Log.Error().Err(err).Msg("Error removing vehicle from redis set")
 					} else {
 						logger.Log.Debug().Msg("Vehicle plate removed redis set successfully")
 					}
@@ -102,7 +102,7 @@ func main() {
 
 				err = rabbitmq.PublishEvent(rabbitMQClient.Connection, cfg.QueueName, eventPayload)
 				if err != nil {
-					logger.Log.Fatal().Err(err).Msg("Failed to publish event")
+					logger.Log.Error().Err(err).Msg("Failed to publish event")
 				}
 
 			}

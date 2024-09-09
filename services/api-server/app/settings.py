@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     port: int = 8000
-    filename: str = "/project/log/log.txt"
+    filename: str = "/var/log/log.txt"
     log_level: str = "DEBUG"
 
     class Config:

@@ -61,8 +61,30 @@ type ExitEventProcessor struct {
 	RedisClient *redis.RedisClient
 }
 
-func createContactJSON(log ParkingLog) ([]byte, error) {
+func createJsonBody(log ParkingLog) ([]byte, error) {
 	return json.Marshal(log)
+}
+
+func generateParkingSummary(vehiclePlate string, exitDateTime time.Time, rClient *redis.RedisClient) (*ParkingLog, error) {
+
+	// Retrieve entry time
+	fieldName := "entry_date_time"
+	layout := time.RFC3339
+	entryDateTime, err := rClient.GetFieldAsTime(vehiclePlate, fieldName, layout)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving entry time: %v", err)
+	}
+
+	parkingDuration := exitDateTime.Sub(entryDateTime).String()
+	logger.Log.Debug().Msgf("Duration: %v", parkingDuration)
+
+	return &ParkingLog{
+		VehiclePlate:  vehiclePlate,
+		EntryDateTime: entryDateTime,
+		ExitDateTime:  exitDateTime,
+		Duration:      parkingDuration,
+	}, nil
+
 }
 
 func (eventprocessor *ExitEventProcessor) ProcessMessage(msgBody []byte) error {
@@ -78,45 +100,19 @@ func (eventprocessor *ExitEventProcessor) ProcessMessage(msgBody []byte) error {
 
 	// Store exit time
 	if err := eventprocessor.RedisClient.AddFieldToHash(hashKey, fieldName, fieldValue); err != nil {
-		logger.Log.Fatal().Err(err).Msg("Failed writing to Redis")
+		logger.Log.Error().Err(err).Msg("Failed writing to Redis")
 		return err
 	}
 
 	logger.Log.Debug().Msgf("Added to Redis: key - %s; field - %s; value - %s", hashKey, fieldName, fieldValue)
 
-	// Create ParkingLog instance
-	parkingLog := ParkingLog{
-		VehiclePlate: payload.VehiclePlate,
-		ExitDateTime: payload.ExitDateTime,
-	}
-
-	// Post ParkingLog to REST API
-	if err := postParkingLog(&parkingLog, eventprocessor.RedisClient); err != nil {
-		//return err
-		//handle ?
-	}
-
-	return nil
-}
-
-// postParkingLog sends ParkingLog to the REST API server
-func postParkingLog(parkingLog *ParkingLog, rClient *redis.RedisClient) error {
-	logger.Log.Debug().Msgf("Exit time: %v", parkingLog.ExitDateTime)
-
-	// Retrieve entry time
-	fieldName := "entry_date_time"
-	layout := time.RFC3339
-	entryTime, err := rClient.GetFieldAsTime(parkingLog.VehiclePlate, fieldName, layout)
+	parkingLog, err := generateParkingSummary(payload.VehiclePlate, payload.ExitDateTime, eventprocessor.RedisClient)
 	if err != nil {
-		return fmt.Errorf("error retrieving entry time: %v", err)
+		return fmt.Errorf("error creating Parking Log: %v", err)
 	}
-
-	parkingLog.EntryDateTime = entryTime
-	parkingLog.Duration = parkingLog.ExitDateTime.Sub(parkingLog.EntryDateTime).String()
-	logger.Log.Debug().Msgf("Duration: %v", parkingLog.Duration)
 
 	// Marshal ParkingLog to JSON
-	jsonBody, err := createContactJSON(*parkingLog)
+	jsonBody, err := createJsonBody(*parkingLog)
 	if err != nil {
 		return fmt.Errorf("error marshaling JSON: %v", err)
 	}
@@ -136,6 +132,7 @@ func postParkingLog(parkingLog *ParkingLog, rClient *redis.RedisClient) error {
 	}
 
 	return nil
+
 }
 
 func main() {

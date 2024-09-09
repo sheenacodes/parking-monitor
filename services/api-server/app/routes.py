@@ -22,7 +22,8 @@ async def log_vehicle_exit(summary: VehicleSummary):
         write_to_file(summary)
         return {"message": "Vehicle summary recorded successfully"}
     except Exception as e:
+        logger.error(str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to record event: {str(e)}",
+            detail=f"Failed to record event to file",
         )
