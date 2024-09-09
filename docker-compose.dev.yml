@@ -6,9 +6,9 @@ services:
     image: rabbitmq:3.13-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"   # RabbitMQ
+      - "5672:5672" # RabbitMQ
       - "15672:15672" # Management Plugin
-    #environment:
+      #environment:
       #RABBITMQ_DEFAULT_USER: user
       #RABBITMQ_DEFAULT_PASS: password
       #RABBITMQ_DEFINITIONS: /etc/rabbitmq/definitions.json
@@ -18,8 +18,8 @@ services:
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
       - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
       #- ./rabbitmq/init-rabbitmq.sh:/docker-entrypoint-init.d/init-rabbitmq.sh
-    entrypoint: ["docker-entrypoint.sh"]
-    command: ["rabbitmq-server"]
+    entrypoint: [ "docker-entrypoint.sh" ]
+    command: [ "rabbitmq-server" ]
     networks:
       - rabbitmq_network
 
@@ -28,9 +28,6 @@ services:
       context: ./services/parking-simulator/
       dockerfile: Dockerfile.dev
     container_name: entrygenerator
-    depends_on:
-      - rabbitmq
-      - redis
     environment:
       - LOG_LEVEL=DEBUG
       - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
@@ -40,10 +37,9 @@ services:
       - REDIS_ADDR=redis:6379
       - REDIS_DB=0
     volumes:
-      - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils  # Mount local shared utils
-    command: ["sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go"]
+      - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils # Mount local shared utils
+    command: [ "sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go" ]
 
-    
     networks:
       - rabbitmq_network
 
@@ -52,9 +48,6 @@ services:
       context: ./services/parking-simulator/
       dockerfile: Dockerfile.dev
     container_name: exitgenerator
-    depends_on:
-      - rabbitmq
-      - redis
     environment:
       - LOG_LEVEL=DEBUG
       - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
@@ -64,8 +57,8 @@ services:
       - REDIS_ADDR=redis:6379
       - REDIS_DB=0
     volumes:
-      - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils  # Mount local shared utils
-    command: ["sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go"]
+      - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils # Mount local shared utils
+    command: [ "sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go" ]
 
     networks:
       - rabbitmq_network
@@ -75,9 +68,6 @@ services:
       context: ./services/parking-record-keeper/
       dockerfile: Dockerfile.dev
     container_name: recordkeeper
-    depends_on:
-      - rabbitmq
-      - redis
     environment:
       - LOG_LEVEL=DEBUG
       - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
@@ -87,8 +77,8 @@ services:
       - REDIS_ADDR=redis:6379
       - REDIS_DB=1
     volumes:
-      - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils  # Mount local shared utils
-    command: ["sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go"]
+      - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils # Mount local shared utils
+    command: [ "sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go" ]
 
     networks:
       - rabbitmq_network
@@ -97,16 +87,15 @@ services:
     build:
       context: ./services/api-server
     container_name: api
-    ports:
-      - "8000:8000"
-    environment:
-      - PORT=8000
-      - FILENAME=/logs/log.txt
+    # ports:
+    #   - "8000:8000"
+      #   environment:
+      # - PORT=8000
+      # - FILENAME=/project/log/log.txt
     volumes:
-       - ./parkinglogs:/logs
+      - data:/project/log
     networks:
-       - rabbitmq_network
-
+      - rabbitmq_network
 
   redis:
     image: redis:7.4
@@ -115,7 +104,7 @@ services:
       - "6379:6379"
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
     environment:
       - REDIS_PASSWORD=your_redis_password # Set Redis password
     networks:
@@ -128,5 +117,6 @@ networks:
     driver: bridge
 
 volumes:
+  data:
   rabbitmq_data:
   rabbitmq_logs:

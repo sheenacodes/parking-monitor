@@ -1,18 +1,20 @@
 FROM python:3.12-slim
 
-WORKDIR /app
+WORKDIR /project
 
 RUN useradd -m -u 1000 appuser
 
 COPY requirements.txt .
-
-COPY ./app /app/app
-
-RUN chown -R appuser:appuser /app
-
-USER appuser
-#ENV PATH="/root/.local/bin:${PATH}"
-
 RUN pip install -r requirements.txt
 
-CMD ["uvicorn", "app.main:app"]
+COPY ./app /project/app
+COPY ./log /project/log
+
+
+RUN ls -la /project  # Debugging step to list files
+
+RUN chown -R appuser:appuser /project
+
+USER appuser
+
+CMD ["python", "-m", "app.main"]

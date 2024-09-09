@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     port: int = 8000
-    filename: str = "vehicle_summary.txt"
+    filename: str = "/project/log/log.txt"
 
     class Config:
         env_file = ".env"
