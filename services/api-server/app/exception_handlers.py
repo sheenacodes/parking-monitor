@@ -2,6 +2,9 @@ from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from app.models import ErrorResponse
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 async def custom_validation_exception_handler(

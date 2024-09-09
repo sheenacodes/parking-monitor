@@ -120,3 +120,5 @@ volumes:
   data:
   rabbitmq_data:
   rabbitmq_logs:
+
+

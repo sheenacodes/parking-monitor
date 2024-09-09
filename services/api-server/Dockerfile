@@ -14,6 +14,7 @@ COPY ./log /project/log
 RUN ls -la /project  # Debugging step to list files
 
 RUN chown -R appuser:appuser /project
+RUN chmod u+w /project/log/log.txt
 
 USER appuser
 

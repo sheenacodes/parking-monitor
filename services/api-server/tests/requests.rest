@@ -7,6 +7,6 @@ Content-Type: application/json
 {
    "vehicle_plate":"sla333",
    "entry_date_time":"12",
-   "exit_date_time":"1",
+   "exit_date_time":"112",
    "duration":"1"
 }
