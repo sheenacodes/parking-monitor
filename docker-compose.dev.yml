@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
 
@@ -23,7 +22,7 @@ services:
     networks:
       - rabbitmq_network
 
-  entry_generator:
+  entry-generator:
     build:
       context: ./services/parking-simulator/
       dockerfile: Dockerfile.dev
@@ -39,11 +38,13 @@ services:
     volumes:
       - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils # Mount local shared utils
     command: [ "sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go" ]
-
+    depends_on:
+      - rabbitmq
+      - redis
     networks:
       - rabbitmq_network
 
-  exit_generator:
+  exit-generator:
     build:
       context: ./services/parking-simulator/
       dockerfile: Dockerfile.dev
@@ -59,15 +60,19 @@ services:
     volumes:
       - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils # Mount local shared utils
     command: [ "sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go" ]
-
+    depends_on:
+      - rabbitmq
+      - redis
     networks:
       - rabbitmq_network
 
-  record_keeper:
+  record-keeper:
     build:
       context: ./services/parking-record-keeper/
       dockerfile: Dockerfile.dev
     container_name: recordkeeper
+    ports:
+      - "2112:2112"
     environment:
       - LOG_LEVEL=DEBUG
       - RABBITMQ_URL=amqp://user:password@rabbitmq:5672/
@@ -76,10 +81,13 @@ services:
       - REDIS_PASSWORD=your_redis_password
       - REDIS_ADDR=redis:6379
       - REDIS_DB=1
+      - API_URL=http://python-server:8000/parkinglog
     volumes:
       - ./sharedutils:/go/src/github.com/sheenacodes/sharedutils # Mount local shared utils
     command: [ "sh", "-c", "go mod edit -replace github.com/sheenacodes/sharedutils=/go/src/github.com/sheenacodes/sharedutils && go run main.go" ]
-
+    depends_on:
+      - rabbitmq
+      - redis
     networks:
       - rabbitmq_network
 
@@ -109,6 +117,17 @@ services:
       - REDIS_PASSWORD=your_redis_password # Set Redis password
     networks:
       - rabbitmq_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - rabbitmq_network
+
 
 networks:
   rabbitmq_network:

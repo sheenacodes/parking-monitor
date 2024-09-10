@@ -63,7 +63,7 @@ func main() {
 
 	} else {
 
-		exitRatio := 0.8
+		exitPercent := 80
 
 		for {
 			time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
@@ -75,12 +75,13 @@ func main() {
 
 			eventPayload := event.GenerateExitEvent()
 
-			randomProbability := rand.Float64()
+			randomProbability := rand.Intn(100) + 1
 			logger.Log.Debug().Msgf("random prob %f", randomProbability)
 
-			if randomProbability <= exitRatio && registeredCarAvailableForExit {
+			if randomProbability <= exitPercent && registeredCarAvailableForExit {
 
 				parkedVehiclePlate, err := redisClient.GetRandomItemFromSet(redisSetName)
+				// not random
 				logger.Log.Debug().Msgf("random parked vehicle plate %s", parkedVehiclePlate)
 
 				if err == nil {

@@ -1,7 +1,6 @@
 
 sharedutils/
-parking_durations/
-
+parking_durations/log.txt
 
 # Ignore Mac system files
 .DS_Store

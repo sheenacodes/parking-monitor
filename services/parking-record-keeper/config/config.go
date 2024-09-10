@@ -13,6 +13,7 @@ type Config struct {
 	RedisAddress   string
 	RedisPassword  string
 	RedisDB        int
+	APIURL         string
 }
 
 func LoadConfig() *Config {
@@ -24,6 +25,7 @@ func LoadConfig() *Config {
 		RedisAddress:   getEnv("REDIS_ADDR", "redis"),
 		RedisPassword:  getEnv("REDIS_PASSWORD", ""),
 		RedisDB:        getEnvAsInt("REDIS_DB", 0),
+		APIURL:         getEnv("API_URL", "http://python-server:8000/parkinglog"),
 	}
 }
 
