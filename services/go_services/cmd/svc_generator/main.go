@@ -1,14 +1,13 @@
 package main
 
 import (
+	"go_services/cmd/svc_generator/config"
+	"go_services/cmd/svc_generator/event"
+	"go_services/pkg/logger"
+	"go_services/pkg/rabbitmq"
+	"go_services/pkg/redis"
 	"math/rand"
-	"parking-simulator/config"
-	"parking-simulator/event"
 	"time"
-
-	"github.com/sheenacodes/sharedutils/logger"
-	"github.com/sheenacodes/sharedutils/rabbitmq"
-	"github.com/sheenacodes/sharedutils/redis"
 )
 
 const (
@@ -75,10 +74,10 @@ func main() {
 
 			eventPayload := event.GenerateExitEvent()
 
-			randomProbability := rand.Intn(100) + 1
-			logger.Log.Debug().Msgf("random prob %f", randomProbability)
+			randomPercent := rand.Intn(100) + 1
+			logger.Log.Debug().Msgf("random number %d", randomPercent)
 
-			if randomProbability <= exitPercent && registeredCarAvailableForExit {
+			if randomPercent <= exitPercent && registeredCarAvailableForExit {
 
 				parkedVehiclePlate, err := redisClient.GetRandomItemFromSet(redisSetName)
 				// not random

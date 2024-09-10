@@ -10,7 +10,7 @@ RUN pip install -r requirements.txt
 COPY . /project/
 
 RUN chown -R appuser:appuser /project
-RUN  chmod 644 /project/log
+RUN  chmod 644 /project/log/log.txt
 USER appuser
 
 CMD ["python", "-m", "app.main"]

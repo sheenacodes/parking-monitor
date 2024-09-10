@@ -2,13 +2,14 @@ package processors
 
 import (
 	"encoding/json"
-	"parking-record-keeper/metrics"
-	"parking-record-keeper/models"
+	"go_services/cmd/svc_backend/metrics"
+	"go_services/cmd/svc_backend/models"
 	"time"
 
+	"go_services/pkg/logger"
+	"go_services/pkg/redis"
+
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/sheenacodes/sharedutils/logger"
-	"github.com/sheenacodes/sharedutils/redis"
 )
 
 // EntryEventProcessor handles the processing of entry events.

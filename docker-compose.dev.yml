@@ -14,8 +14,8 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - rabbitmq_logs:/var/log/rabbitmq
-      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./platform_config/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./platform_config/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
       #- ./rabbitmq/init-rabbitmq.sh:/docker-entrypoint-init.d/init-rabbitmq.sh
     entrypoint: [ "docker-entrypoint.sh" ]
     command: [ "rabbitmq-server" ]
@@ -68,7 +68,7 @@ services:
 
   record-keeper:
     build:
-      context: ./services/parking-record-keeper/
+      context: ./services/go_services/cmd/svc_backend/
       dockerfile: Dockerfile.dev
     container_name: recordkeeper
     ports:
@@ -101,7 +101,7 @@ services:
       # - PORT=8000
       # - FILENAME=/project/log/log.txt
     volumes:
-      - ./parking_durations:/var/log
+      - ./output_files:/var/log
     networks:
       - rabbitmq_network
 
@@ -111,7 +111,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./platform_config/redis/redis.conf:/usr/local/etc/redis/redis.conf
     command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
     environment:
       - REDIS_PASSWORD=your_redis_password # Set Redis password
@@ -122,7 +122,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./platform_config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     networks:

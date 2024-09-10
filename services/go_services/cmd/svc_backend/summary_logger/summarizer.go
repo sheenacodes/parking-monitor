@@ -2,10 +2,9 @@ package summary_logger
 
 import (
 	"fmt"
-	"parking-record-keeper/models"
+	"go_services/cmd/svc_backend/models"
+	"go_services/pkg/redis"
 	"time"
-
-	"github.com/sheenacodes/sharedutils/redis"
 )
 
 // GenerateParkingSummary creates a ParkingLog based on the exit event.

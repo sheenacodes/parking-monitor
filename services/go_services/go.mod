@@ -1,11 +1,6 @@
-module parking-record-keeper
+module go_services
 
 go 1.23.1
-
-require (
-	github.com/prometheus/client_golang v1.20.3
-	github.com/sheenacodes/sharedutils v1.2.0
-)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -15,6 +10,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/prometheus/client_golang v1.20.3 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect

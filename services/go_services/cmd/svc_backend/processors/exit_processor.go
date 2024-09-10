@@ -2,14 +2,14 @@ package processors
 
 import (
 	"encoding/json"
-	"parking-record-keeper/metrics"
-	"parking-record-keeper/models"
-	"parking-record-keeper/summary_logger"
+	"go_services/cmd/svc_backend/metrics"
+	"go_services/cmd/svc_backend/models"
+	"go_services/cmd/svc_backend/summary_logger"
+	"go_services/pkg/logger"
+	"go_services/pkg/redis"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/sheenacodes/sharedutils/logger"
-	"github.com/sheenacodes/sharedutils/redis"
 )
 
 // ExitEventProcessor handles the processing of exit events.

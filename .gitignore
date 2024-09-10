@@ -16,6 +16,7 @@ parking_durations/log.txt
 # -----------------------------------------------------------------------------
 
 # Byte-compiled / optimized / DLL files
+.ruff_cache/
 __pycache__/
 *.py[cod]
 *$py.class

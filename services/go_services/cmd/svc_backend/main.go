@@ -1,13 +1,12 @@
 package main
 
 import (
+	"go_services/cmd/svc_backend/config"
+	"go_services/cmd/svc_backend/processors"
+	"go_services/pkg/logger"
+	"go_services/pkg/rabbitmq"
+	"go_services/pkg/redis"
 	"net/http"
-	"parking-record-keeper/config"
-	"parking-record-keeper/processors"
-
-	"github.com/sheenacodes/sharedutils/logger"
-	"github.com/sheenacodes/sharedutils/rabbitmq"
-	"github.com/sheenacodes/sharedutils/redis"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

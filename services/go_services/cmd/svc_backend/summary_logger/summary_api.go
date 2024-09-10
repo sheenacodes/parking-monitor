@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go_services/cmd/svc_backend/models"
 	"net/http"
-	"parking-record-keeper/models"
 )
 
 // PostSummary sends the ParkingLog to the REST API server.
