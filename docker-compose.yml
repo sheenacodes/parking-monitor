@@ -92,7 +92,7 @@ services:
       - PORT=8000
       - FILENAME=/project/log/log.txt
     volumes:
-      - ./output_files:/var/log
+      - ./output_files:/project/log
     networks:
       - rabbitmq_network
 
