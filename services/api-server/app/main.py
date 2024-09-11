@@ -8,9 +8,9 @@ import logging
 
 
 logging.basicConfig(
-    level=settings.log_level.upper(),  
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",  
-    datefmt="%Y-%m-%d %H:%M:%S",  
+    level=settings.log_level.upper(),
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ app.include_router(parking_log_router)
 
 @app.get("/")
 def read_root():
-    logger.debug(f"api root / called")
+    logger.debug("api root / called")
     return {"message": "Welcome to the Vehicle Parking Summary API"}
 
 
@@ -34,6 +34,7 @@ app.add_exception_handler(RequestValidationError, custom_validation_exception_ha
 
 def main():
     import uvicorn
+
     logger.debug(f"port set to {settings.port}")
     uvicorn.run(app, host="0.0.0.0", port=settings.port)
 

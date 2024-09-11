@@ -11,4 +11,3 @@ def write_to_file(summary: VehicleSummary):
         file.write(
             f"{summary.vehicle_plate}, {summary.entry_date_time}, {summary.exit_date_time}, {summary.duration}\n"
         )
-        file.flush()
