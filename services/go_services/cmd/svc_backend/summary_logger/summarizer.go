@@ -16,6 +16,7 @@ func GenerateParkingSummary(vehiclePlate string, exitDateTime time.Time, rClient
 		return nil, fmt.Errorf("error retrieving entry time: %v", err)
 	}
 
+	// catch error here too
 	parkingDuration := exitDateTime.Sub(entryDateTime).String()
 	return &models.ParkingLog{
 		VehiclePlate:  vehiclePlate,
