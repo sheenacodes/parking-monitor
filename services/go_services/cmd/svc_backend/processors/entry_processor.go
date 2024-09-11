@@ -11,13 +11,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-type DataStore interface {
-	AddFieldToHash(hashKey string, fieldName string, fieldValue time.Time) error
-}
-
 // EntryEventProcessor handles the processing of entry events.
 type EntryEventProcessor struct {
-	dataStore DataStore
+	DataStore DataStore
 }
 
 // ProcessMessage processes an entry event message.
@@ -37,7 +33,7 @@ func (p *EntryEventProcessor) ProcessMessage(msgBody []byte) error {
 	fieldValue := payload.EntryDateTime
 	logger.Log.Debug().Msgf("Storing entry: key - %s; field - %s; value - %s", hashKey, fieldName, fieldValue)
 
-	if err := p.dataStore.AddFieldToHash(hashKey, fieldName, fieldValue); err != nil {
+	if err := p.DataStore.AddFieldToHash(hashKey, fieldName, fieldValue); err != nil {
 		// metrics instrumentation: Increment the error counter for Redis operation error
 		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "entry", "error_stage": "redis_write"}).Inc()
 

@@ -6,6 +6,7 @@ import (
 	"go_services/pkg/logger"
 	"go_services/pkg/rabbitmq"
 	"go_services/pkg/redis"
+	"go_services/pkg/restapi"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -42,7 +43,7 @@ func main() {
 
 	// Initialize EntryEventProcessor
 	entryEvtProcessor := &processors.EntryEventProcessor{
-		RedisClient: redisClient,
+		DataStore: redisClient,
 	}
 	// Handle Entry Events
 	if err := rabbitMQClient.ConsumeQueue(cfg.EntryQueueName, entryEvtProcessor); err != nil {
@@ -50,10 +51,22 @@ func main() {
 	}
 	logger.Log.Debug().Msg("Entry queue consumer set up")
 
+	// Configure the HTTP client
+	client := &http.Client{}
+
+	// Set the API URL
+	apiURL := cfg.APIURL
+
+	// Create the SummaryPoster implementation
+	summaryPoster := &restapi.HTTPClientPoster{
+		Client: client,
+		APIURL: apiURL,
+	}
+
 	// Initialize ExitEventProcessor
 	exitEvtProcessor := &processors.ExitEventProcessor{
-		RedisClient: redisClient,
-		APIURL:      cfg.APIURL, // Set the API URL from configuration
+		DataStore:     redisClient,
+		SummaryPoster: summaryPoster,
 	}
 	// Handle Exit Events
 	if err := rabbitMQClient.ConsumeQueue(cfg.ExitQueueName, exitEvtProcessor); err != nil {

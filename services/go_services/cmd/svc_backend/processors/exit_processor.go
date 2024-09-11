@@ -2,11 +2,10 @@ package processors
 
 import (
 	"encoding/json"
+	"fmt"
 	"go_services/cmd/svc_backend/metrics"
 	"go_services/cmd/svc_backend/models"
-	"go_services/cmd/svc_backend/summary_logger"
 	"go_services/pkg/logger"
-	"go_services/pkg/redis"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -14,8 +13,8 @@ import (
 
 // ExitEventProcessor handles the processing of exit events.
 type ExitEventProcessor struct {
-	RedisClient *redis.RedisClient
-	APIURL      string
+	DataStore     DataStore
+	SummaryPoster SummaryPoster
 }
 
 // ProcessMessage processes an exit event message.
@@ -34,16 +33,23 @@ func (p *ExitEventProcessor) ProcessMessage(msgBody []byte) error {
 	fieldValue := payload.ExitDateTime
 	logger.Log.Debug().Msgf("Storing exit: key - %s; field - %s; value - %s", hashKey, fieldName, fieldValue)
 
-	// Store the exit time in Redis
-	if err := p.RedisClient.AddFieldToHash(hashKey, fieldName, fieldValue); err != nil {
-		logger.Log.Fatal().Err(err).Msg("Failed writing to Redis")
+	// Store the exit time
+	if err := p.DataStore.AddFieldToHash(hashKey, fieldName, fieldValue); err != nil {
+		logger.Log.Fatal().Err(err).Msg("Failed writing to datastore")
 		// metrics instrumentation:
-		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "redis_write"}).Inc()
+		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "db_write"}).Inc()
 		return err
 	}
 
+	fieldName = "entry_date_time"
+	layout := time.RFC3339
+	entryDateTime, err := p.DataStore.GetFieldAsTime(payload.VehiclePlate, fieldName, layout)
+	if err != nil {
+		return fmt.Errorf("error retrieving entry time: %v", err)
+	}
+
 	// Generate the parking summary
-	parkingLog, err := summary_logger.GenerateParkingSummary(payload.VehiclePlate, payload.ExitDateTime, p.RedisClient)
+	parkingLog, err := GenerateParkingSummary(payload.VehiclePlate, payload.ExitDateTime, entryDateTime)
 	if err != nil {
 		// metrics instrumentation:
 		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "generate_summary"}).Inc()
@@ -51,7 +57,7 @@ func (p *ExitEventProcessor) ProcessMessage(msgBody []byte) error {
 	}
 
 	// Post the parking summary to the API
-	if err := summary_logger.PostSummary(p.APIURL, *parkingLog); err != nil {
+	if err := p.SummaryPoster.PostSummary(*parkingLog); err != nil {
 		// metrics instrumentation:
 		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "post_summary"}).Inc()
 		return err
