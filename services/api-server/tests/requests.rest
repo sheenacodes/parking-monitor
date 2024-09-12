@@ -6,7 +6,7 @@ Content-Type: application/json
 
 {
    "vehicle_plate":"dtw332",
-   "entry_date_time":"12",
-   "exit_date_time":"112",
+   "entry_date_time":"2024-09-11T21:24:59.16730028Z",
+   "exit_date_time":"2024-09-11T21:24:59.167320028Z",
    "duration":"1"
 }

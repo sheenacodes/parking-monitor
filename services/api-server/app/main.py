@@ -34,8 +34,7 @@ app.add_exception_handler(RequestValidationError, custom_validation_exception_ha
 
 def main():
     import uvicorn
-
-    logger.debug(f"port set to {settings.port}")
+    logger.info(f"env settings: {settings.model_dump()}")
     uvicorn.run(app, host="0.0.0.0", port=settings.port)
 
 

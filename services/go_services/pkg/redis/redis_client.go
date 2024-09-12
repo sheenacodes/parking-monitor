@@ -49,10 +49,8 @@ func GetRedisClient(addr string, pword string, database int) (*RedisClient, erro
 		}
 	}
 
-	//if err != nil {
 	logger.Log.Fatal().Err(err).Msg("Failed to connect to Redis after multiple attempts")
 
 	return nil, fmt.Errorf("failed to connect to Redis after %d attempts: %v", maxRetries, err)
-	//}
 
 }

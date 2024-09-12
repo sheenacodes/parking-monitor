@@ -24,7 +24,7 @@ func (p *ExitEventProcessor) ProcessMessage(msgBody []byte) error {
 	// Unmarshal the incoming JSON message to the ExitEvent struct
 	var payload models.ExitEvent
 	if err := json.Unmarshal(msgBody, &payload); err != nil {
-		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "unmarshal"}).Inc()
+		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "json_unmarshal"}).Inc()
 		return err
 	}
 
@@ -35,9 +35,9 @@ func (p *ExitEventProcessor) ProcessMessage(msgBody []byte) error {
 
 	// Store the exit time
 	if err := p.DataStore.AddFieldToHash(hashKey, fieldName, fieldValue); err != nil {
-		logger.Log.Fatal().Err(err).Msg("Failed writing to datastore")
+		logger.Log.Error().Err(err).Msg("Failed writing to datastore")
 		// metrics instrumentation:
-		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "db_write"}).Inc()
+		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "db_write_error"}).Inc()
 		return err
 	}
 
@@ -45,6 +45,8 @@ func (p *ExitEventProcessor) ProcessMessage(msgBody []byte) error {
 	layout := time.RFC3339
 	entryDateTime, err := p.DataStore.GetFieldAsTime(payload.VehiclePlate, fieldName, layout)
 	if err != nil {
+		// metrics instrumentation:
+		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "db_read_error"}).Inc()
 		return fmt.Errorf("error retrieving entry time: %v", err)
 	}
 
@@ -59,7 +61,7 @@ func (p *ExitEventProcessor) ProcessMessage(msgBody []byte) error {
 	// Post the parking summary to the API
 	if err := p.SummaryPoster.PostSummary(*parkingLog); err != nil {
 		// metrics instrumentation:
-		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "post_summary"}).Inc()
+		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "exit", "error_stage": "api_post_error"}).Inc()
 		return err
 	}
 

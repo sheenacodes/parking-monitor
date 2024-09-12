@@ -23,7 +23,7 @@ func (p *EntryEventProcessor) ProcessMessage(msgBody []byte) error {
 	var payload models.EntryEvent
 	if err := json.Unmarshal(msgBody, &payload); err != nil {
 		// metrics instrumentation: Increment the error counter for JSON unmarshal error
-		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "entry", "error_stage": "unmarshal"}).Inc()
+		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "entry", "error_stage": "json_unmarshal"}).Inc()
 
 		return err
 	}
@@ -35,7 +35,7 @@ func (p *EntryEventProcessor) ProcessMessage(msgBody []byte) error {
 
 	if err := p.DataStore.AddFieldToHash(hashKey, fieldName, fieldValue); err != nil {
 		// metrics instrumentation: Increment the error counter for Redis operation error
-		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "entry", "error_stage": "redis_write"}).Inc()
+		metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "entry", "error_stage": "db_write_error"}).Inc()
 
 		return err
 	}

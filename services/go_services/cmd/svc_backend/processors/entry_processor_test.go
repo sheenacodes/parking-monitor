@@ -5,13 +5,22 @@ import (
 	"errors"
 	"go_services/cmd/svc_backend/metrics"
 	"go_services/cmd/svc_backend/models"
+	"go_services/pkg/logger"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
+
+func init() {
+	// Set up zerolog to log to stderr with human-readable console output
+	logger.Log = zerolog.New(os.Stderr).With().Timestamp().Logger()
+	zerolog.SetGlobalLevel(zerolog.DebugLevel) // Set the logging level to Debug
+}
 
 func TestEntryEventProcessor_ProcessMessage(t *testing.T) {
 	tests := []struct {
@@ -20,17 +29,19 @@ func TestEntryEventProcessor_ProcessMessage(t *testing.T) {
 		mockError     error
 		expectedError bool
 		expectedCount float64
+		errorStage    string
 	}{
 		{
 			name:          "Invalid JSON",
-			msgBody:       []byte("{invalid json}"),
+			msgBody:       []byte("invalid json}"),
 			expectedError: true,
 			expectedCount: 1, // Expect the JSON unmarshal error metric to increment
+			errorStage:    "json_unmarshal",
 		},
 		{
 			name: "DB Error",
 			msgBody: func() []byte {
-				entryDateTime, _ := time.Parse(time.RFC3339, "2024-09-11T10:00:00Z") // Correctly parse the time
+				entryDateTime, _ := time.Parse(time.RFC3339, "2024-09-11T10:00:00Z")
 				payload := models.EntryEvent{
 					VehiclePlate:  "ABC123",
 					EntryDateTime: entryDateTime,
@@ -41,11 +52,12 @@ func TestEntryEventProcessor_ProcessMessage(t *testing.T) {
 			mockError:     errors.New("DB write error"),
 			expectedError: true,
 			expectedCount: 1, // Expect the Redis operation error metric to increment
+			errorStage:    "db_write_error",
 		},
 		{
 			name: "Successful Processing",
 			msgBody: func() []byte {
-				entryDateTime, _ := time.Parse(time.RFC3339, "2024-09-11T10:30:00Z") // Correctly parse the time
+				entryDateTime, _ := time.Parse(time.RFC3339, "2024-09-11T10:30:00Z")
 				payload := models.EntryEvent{
 					VehiclePlate:  "XYZ789",
 					EntryDateTime: entryDateTime,
@@ -55,6 +67,7 @@ func TestEntryEventProcessor_ProcessMessage(t *testing.T) {
 			}(),
 			expectedError: false,
 			expectedCount: 1, // Expect the success metric to increment
+			errorStage:    "",
 		},
 	}
 
@@ -79,24 +92,17 @@ func TestEntryEventProcessor_ProcessMessage(t *testing.T) {
 			// Call ProcessMessage with the test message body
 			err := processor.ProcessMessage(tt.msgBody)
 
-			// Verify the expected error state
+			// Verify the expected error state and metrics
 			if tt.expectedError {
 				assert.Error(t, err)
+				count := testutil.ToFloat64(metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "entry", "error_stage": tt.errorStage}))
+				assert.Equal(t, tt.expectedCount, count)
 			} else {
 				assert.NoError(t, err)
-			}
-
-			// Verify the metrics
-			if tt.name == "Invalid JSON" {
-				count := testutil.ToFloat64(metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "entry", "error_stage": "unmarshal"}))
-				assert.Equal(t, tt.expectedCount, count)
-			} else if tt.name == "Redis Operation Error" {
-				count := testutil.ToFloat64(metrics.EventProcessingFails.With(prometheus.Labels{"event_type": "entry", "error_stage": "redis_write"}))
-				assert.Equal(t, tt.expectedCount, count)
-			} else if tt.name == "Successful Processing" {
 				count := testutil.ToFloat64(metrics.EventProcessingSuccesses.With(prometheus.Labels{"event_type": "entry"}))
 				assert.Equal(t, tt.expectedCount, count)
 			}
+
 		})
 	}
 }

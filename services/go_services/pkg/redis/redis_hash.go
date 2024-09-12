@@ -22,7 +22,7 @@ func (r *RedisClient) AddFieldToHash(hashKey string, fieldName string, fieldValu
 }
 
 func (r *RedisClient) GetFieldAsTime(hashKey string, fieldName string, layout string) (time.Time, error) {
-	// Use HGet to retrieve the field value
+
 	ctx := context.Background()
 	value, err := r.Client.HGet(ctx, hashKey, fieldName).Result()
 	if err != nil {

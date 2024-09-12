@@ -13,4 +13,6 @@ RUN chown -R appuser:appuser /project
 RUN  chmod 644 /project/log/log.txt
 USER appuser
 
+ENV filename=/project/log/log.txt
+
 CMD ["python", "-m", "app.main"]

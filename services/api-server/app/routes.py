@@ -26,5 +26,5 @@ async def log_vehicle_exit(summary: VehicleSummary):
         logger.error(str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to record event to file",
+            detail="Failed to record vehicle summary",
         )

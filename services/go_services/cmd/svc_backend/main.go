@@ -12,27 +12,45 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func main() {
+// print config for debug purposes
+func printConfig(cfg *config.Config) {
+	logger.Log.Info().
+		Str("RabbitMQURL", cfg.RabbitMQURL).
+		Str("RedisAddress", cfg.RedisAddress).
+		Str("RedisPassword", cfg.RedisPassword).
+		Int("RedisDB", cfg.RedisDB).
+		Str("EntryQueueName", cfg.EntryQueueName).
+		Str("ExitQueueName", cfg.ExitQueueName).
+		Str("APIURL", cfg.APIURL).
+		Msg("Configuration settings")
+}
 
-	// Load configuration
+// loadConfig loads the application configuration
+func loadConfig() *config.Config {
 	cfg := config.LoadConfig()
 	logger.InitLogger(cfg.LogLevel)
+	printConfig(cfg)
+	return cfg
+}
 
-	// Initialize RabbitMQ client
+// initializeServices initializes the RabbitMQ and Redis clients
+func initializeServices(cfg *config.Config) (*rabbitmq.RabbitMQClient, *redis.RedisClient, error) {
 	rabbitMQClient, err := rabbitmq.GetRabbitMQClient(cfg.RabbitMQURL)
 	if err != nil {
-		logger.Log.Fatal().Err(err).Msg("Failed to initialize RabbitMQ client")
+		return nil, nil, err
 	}
-	defer rabbitMQClient.Close()
 
-	// Initialize Redis client
 	redisClient, err := redis.GetRedisClient(cfg.RedisAddress, cfg.RedisPassword, cfg.RedisDB)
 	if err != nil {
-		logger.Log.Fatal().Err(err).Msg("Error connecting to Redis")
+		rabbitMQClient.Close()
+		return nil, nil, err
 	}
-	defer redisClient.Client.Close()
 
-	// Start the Prometheus metrics HTTP server
+	return rabbitMQClient, redisClient, nil
+}
+
+// startMetricsServer starts the Prometheus metrics HTTP server
+func startMetricsServer() {
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
 		logger.Log.Debug().Msg("Starting Prometheus metrics server on :2112/metrics")
@@ -40,27 +58,25 @@ func main() {
 			logger.Log.Fatal().Err(err).Msgf("Error starting Prometheus server: %v", err)
 		}
 	}()
+}
 
+// setupEventProcessors sets up the entry and exit event processors
+func setupEventProcessors(cfg *config.Config, rabbitMQClient *rabbitmq.RabbitMQClient, redisClient *redis.RedisClient) error {
 	// Initialize EntryEventProcessor
 	entryEvtProcessor := &processors.EntryEventProcessor{
 		DataStore: redisClient,
 	}
+
 	// Handle Entry Events
 	if err := rabbitMQClient.ConsumeQueue(cfg.EntryQueueName, entryEvtProcessor); err != nil {
-		logger.Log.Fatal().Err(err).Msg("Failed to consume entry events")
+		return err
 	}
 	logger.Log.Debug().Msg("Entry queue consumer set up")
 
-	// Configure the HTTP client
-	client := &http.Client{}
-
-	// Set the API URL
-	apiURL := cfg.APIURL
-
-	// Create the SummaryPoster implementation
+	// Configure and create SummaryPoster implementation
 	summaryPoster := &restapi.HTTPClientPoster{
-		Client: client,
-		APIURL: apiURL,
+		Client: &http.Client{},
+		APIURL: cfg.APIURL,
 	}
 
 	// Initialize ExitEventProcessor
@@ -68,11 +84,35 @@ func main() {
 		DataStore:     redisClient,
 		SummaryPoster: summaryPoster,
 	}
+
 	// Handle Exit Events
 	if err := rabbitMQClient.ConsumeQueue(cfg.ExitQueueName, exitEvtProcessor); err != nil {
-		logger.Log.Fatal().Err(err).Msg("Failed to consume exit events")
+		return err
 	}
 	logger.Log.Debug().Msg("Exit queue consumer set up")
+
+	return nil
+}
+
+func main() {
+	// Load configuration
+	cfg := loadConfig()
+
+	// Initialize services
+	rabbitMQClient, redisClient, err := initializeServices(cfg)
+	if err != nil {
+		logger.Log.Fatal().Err(err).Msg("Failed to initialize services")
+	}
+	defer rabbitMQClient.Close()
+	defer redisClient.Client.Close()
+
+	// Start the Prometheus metrics server
+	startMetricsServer()
+
+	// Set up event processors
+	if err := setupEventProcessors(cfg, rabbitMQClient, redisClient); err != nil {
+		logger.Log.Fatal().Err(err).Msg("Failed to set up event processors")
+	}
 
 	// Keep the main function running
 	select {}

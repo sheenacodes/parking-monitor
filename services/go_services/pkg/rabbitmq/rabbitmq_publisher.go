@@ -17,7 +17,7 @@ func PublishEvent(conn *amqp091.Connection, queueName string, eventPayload any) 
 
 	body, err := json.Marshal(eventPayload)
 	if err != nil {
-		logger.Log.Fatal().Err(err).Msgf("JSON conversion error in %v...", eventPayload)
+		logger.Log.Error().Err(err).Msgf("JSON conversion error in %v...", eventPayload)
 		return err
 	}
 
