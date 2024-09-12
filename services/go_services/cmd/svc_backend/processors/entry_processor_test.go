@@ -28,7 +28,7 @@ func TestEntryEventProcessor_ProcessMessage(t *testing.T) {
 			expectedCount: 1, // Expect the JSON unmarshal error metric to increment
 		},
 		{
-			name: "Redis Operation Error",
+			name: "DB Error",
 			msgBody: func() []byte {
 				entryDateTime, _ := time.Parse(time.RFC3339, "2024-09-11T10:00:00Z") // Correctly parse the time
 				payload := models.EntryEvent{
@@ -38,7 +38,7 @@ func TestEntryEventProcessor_ProcessMessage(t *testing.T) {
 				b, _ := json.Marshal(payload)
 				return b
 			}(),
-			mockError:     errors.New("redis write error"),
+			mockError:     errors.New("DB write error"),
 			expectedError: true,
 			expectedCount: 1, // Expect the Redis operation error metric to increment
 		},

@@ -13,7 +13,11 @@ import (
 )
 
 // TestExitEventProcessor_Success tests the successful processing of an exit event message.
-func TestExitEventProcessor_Success(t *testing.T) {
+func TestExitEventProcessor_Success(testCase *testing.T) {
+	metrics.EventProcessingFails.Reset()
+	metrics.EventProcessingSuccesses.Reset()
+	metrics.EventProcessingLatency.Reset()
+
 	mockDataStore := &MockDataStore{
 		AddFieldToHashFunc: func(key, field string, value time.Time) error {
 			return nil
@@ -34,22 +38,19 @@ func TestExitEventProcessor_Success(t *testing.T) {
 		SummaryPoster: mockSummaryPoster,
 	}
 
-	// Create a mock exit event payload
 	payload := models.ExitEvent{
 		VehiclePlate: "ABC123",
 		ExitDateTime: time.Now(),
 	}
 	msgBody, _ := json.Marshal(payload)
 
-	// Call the ProcessMessage method
 	err := processor.ProcessMessage(msgBody)
 
-	// Verify no error occurred
-	assert.NoError(t, err)
+	assert.NoError(testCase, err)
 
 	// Verify metrics are incremented correctly
-	assert.Equal(t, 1, testutil.CollectAndCount(metrics.EventProcessingSuccesses))
-	assert.Equal(t, 1, testutil.CollectAndCount(metrics.EventProcessingLatency))
+	assert.Equal(testCase, 1, testutil.CollectAndCount(metrics.EventProcessingSuccesses))
+	assert.Equal(testCase, 1, testutil.CollectAndCount(metrics.EventProcessingLatency))
 }
 
 // TestExitEventProcessor_FailureOnUnmarshal tests the failure scenario when JSON unmarshaling fails.
