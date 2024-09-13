@@ -1,8 +1,21 @@
-todo
+<!-- todo
 
 api docs
 prometheus meyrics
 
 retention rabbit mq
 
-docker exec -it rabbitmq rabbitmqctl set_policy TTL ".*" '{"message-ttl":60000}' --apply-to queues
+docker exec -it rabbitmq rabbitmqctl set_policy TTL ".*" '{"message-ttl":60000}' --apply-to queues -->
+
+
+# Parking Monitor / Duration Calculator
+
+---
+
+set up 
+```
+docker-compose up
+```
+
+
+
