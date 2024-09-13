@@ -51,7 +51,7 @@ pytest
 ## notes:
 
 - focus has been on implementing processing logic and automating setup right up to dashboard.
-- sensitive config information need to be handled better in future version, right now they are seen in config files.
+- sensitive config information need to be handled better in future version, right now they are seen in config files and are default values provided in container image docs.
 - unit tests have been written only to cover core processing logic in the go backend and python rest api code. 
 - instrumentation for prometheus metrics collection has only been done in the go backend service
 
