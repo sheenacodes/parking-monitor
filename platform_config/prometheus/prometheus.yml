@@ -6,7 +6,9 @@ scrape_configs:
   # - job_name: 'api_metrics'
   #   static_configs:
   #     - targets: ['python-server:8000']  
-
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
   - job_name: 'go_consumer_metrics'
     static_configs:
       - targets: ['go_backend:2112']  

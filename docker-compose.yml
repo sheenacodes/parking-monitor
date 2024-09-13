@@ -110,7 +110,7 @@ services:
       - rabbitmq_network
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.54.1
     container_name: prometheus
     volumes:
       - ./platform_config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -119,13 +119,33 @@ services:
     networks:
       - rabbitmq_network
 
+  grafana:
+    image: grafana/grafana-oss:11.2.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=yourpassword  # Set admin password
+      - GF_SERVER_ROOT_URL=http://localhost:3000  # Set root URL
+      - GF_AUTH_ANONYMOUS_ENABLED=true  # Enable anonymous access
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer  # Set anonymous user role
+      - GF_LOG_LEVEL=error
+    volumes:
+      - grafana-data:/var/lib/grafana  # Persist Grafana data
+      - ./platform_config/grafana/provisioning:/etc/grafana/provisioning  # Configuration files
+      - ./platform_config/grafana/dashboards:/etc/grafana/dashboards
+    networks:
+      - rabbitmq_network
+
+volumes:
+  grafana-data:
+  rabbitmq_data:
+  rabbitmq_logs:
 
 networks:
   rabbitmq_network:
     driver: bridge
-
-volumes:
-  rabbitmq_data:
-  rabbitmq_logs:
 
 

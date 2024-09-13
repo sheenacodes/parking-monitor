@@ -1,0 +1,4 @@
+apiVersion: 1
+plugins:
+  - id: grafana-clock-panel
+    path: /etc/grafana/plugins
