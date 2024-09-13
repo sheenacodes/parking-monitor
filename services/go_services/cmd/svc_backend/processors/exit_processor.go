@@ -21,6 +21,7 @@ type ExitEventProcessor struct {
 func (p *ExitEventProcessor) ProcessMessage(msgBody []byte) error {
 	start := time.Now() // metrics instrumentation: Start time for latency measurement
 
+	logger.Log.Info().Msg("Process Exit Event")
 	// Unmarshal the incoming JSON message to the ExitEvent struct
 	var payload models.ExitEvent
 	if err := json.Unmarshal(msgBody, &payload); err != nil {
@@ -65,6 +66,7 @@ func (p *ExitEventProcessor) ProcessMessage(msgBody []byte) error {
 		return err
 	}
 
+	logger.Log.Info().Msg("Process Exit Event Success")
 	// metrics instrumentation: Record the duration taken to process the message
 	duration := time.Since(start).Seconds()
 	metrics.EventProcessingLatency.With(prometheus.Labels{"event_type": "exit"}).Observe(duration)

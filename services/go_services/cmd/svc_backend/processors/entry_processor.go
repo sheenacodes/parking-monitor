@@ -19,7 +19,7 @@ type EntryEventProcessor struct {
 // ProcessMessage processes an entry event message.
 func (p *EntryEventProcessor) ProcessMessage(msgBody []byte) error {
 	start := time.Now() // metrics instrumentation: start timer
-
+	logger.Log.Info().Msg("Process Entry Event")
 	var payload models.EntryEvent
 	if err := json.Unmarshal(msgBody, &payload); err != nil {
 		// metrics instrumentation: Increment the error counter for JSON unmarshal error
@@ -40,6 +40,7 @@ func (p *EntryEventProcessor) ProcessMessage(msgBody []byte) error {
 		return err
 	}
 
+	logger.Log.Info().Msg("Process Entry Event Success")
 	// metrics instrumentation: Record the duration taken to process the message
 	duration := time.Since(start).Seconds()
 	metrics.EventProcessingLatency.With(prometheus.Labels{"event_type": "entry"}).Observe(duration)

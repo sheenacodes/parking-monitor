@@ -1,0 +1,39 @@
+# .pre-commit-config.yaml
+repos:
+  # Ruff for Python
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.6.4 
+    hooks:
+      - id: ruff
+        args: [--fix]  
+        files: \.py$ 
+
+  # Black for Python
+  - repo: https://github.com/psf/black
+    rev: 24.8.0  
+    hooks:
+      - id: black
+        args: [--line-length=88]  
+        files: \.py$ 
+
+  # Golangci-lint for Go
+  # - repo: https://github.com/golangci/golangci-lint
+  #   rev: v1.61.0  # Use the latest version of golangci-lint
+  #   hooks:
+  #     - id: golangci-lint
+  #       name: golangci-lint
+  #       entry: golangci-lint run
+  #       language: golang
+  #       types: [file]
+  #       files: \.go$  
+  #       args: [./services/go_services/cmd] 
+
+  # Gofmt for Go
+  - repo: local
+    hooks:
+      - id: gofmt
+        name: gofmt
+        entry: gofmt -w .
+        language: golang
+        files: \.go$  
+        pass_filenames: false

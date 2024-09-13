@@ -5,22 +5,20 @@ import (
 	"errors"
 	"go_services/cmd/svc_backend/metrics"
 	"go_services/cmd/svc_backend/models"
-	"go_services/pkg/logger"
-	"os"
 	"testing"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
-	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
 
-func init() {
-	// Set up zerolog to log to stderr with human-readable console output
-	logger.Log = zerolog.New(os.Stderr).With().Timestamp().Logger()
-	zerolog.SetGlobalLevel(zerolog.DebugLevel) // Set the logging level to Debug
-}
+// uncomment for test debug logs
+// func init() {
+// 	// Set up zerolog to log to stderr with human-readable console output
+// 	logger.Log = zerolog.New(os.Stderr).With().Timestamp().Logger()
+// 	zerolog.SetGlobalLevel(zerolog.DebugLevel) // Set the logging level to Debug
+// }
 
 func TestEntryEventProcessor_ProcessMessage(t *testing.T) {
 	tests := []struct {

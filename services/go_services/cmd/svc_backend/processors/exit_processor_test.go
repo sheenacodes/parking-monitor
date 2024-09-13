@@ -3,7 +3,6 @@ package processors
 import (
 	"encoding/json"
 	"errors"
-	"os"
 	"testing"
 	"time"
 
@@ -13,17 +12,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
-
-	"go_services/pkg/logger"
-
-	"github.com/rs/zerolog"
 )
 
-func init() {
-	// Set up zerolog to log to stderr with human-readable console output
-	logger.Log = zerolog.New(os.Stderr).With().Timestamp().Logger()
-	zerolog.SetGlobalLevel(zerolog.DebugLevel) // Set the logging level to Debug
-}
+// uncomment for test debug logs
+//
+//	func init() {
+//		// Set up zerolog to log to stderr with human-readable console output
+//		logger.Log = zerolog.New(os.Stderr).With().Timestamp().Logger()
+//		zerolog.SetGlobalLevel(zerolog.DebugLevel) // Set the logging level to Debug
+//	}
 func TestExitEventProcessor(t *testing.T) {
 	testCases := []struct {
 		name                 string
