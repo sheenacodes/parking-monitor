@@ -27,7 +27,8 @@ Once the containers are up and running
 
 
 
-## to run unit tests (tests made to cover core logic; coverage to be improved)
+## to run unit tests 
+(tests made to cover core logic; coverage to be improved)
 
 1. go backend
 ```
@@ -49,6 +50,7 @@ pytest
 - focus has been on implementing processing logic and automating setup right up to dashboard.
 - sensitive config information need to be handled better in future version, right now they are seen in config files.
 - unit tests have been written only to cover core processing logic in the go backend and python rest api code. 
+- 
 
 
 
