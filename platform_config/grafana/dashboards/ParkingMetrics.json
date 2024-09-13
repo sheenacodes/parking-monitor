@@ -114,7 +114,7 @@
             "refId": "A"
           }
         ],
-        "title": "entry and exit event processing success/failure",
+        "title": "Event processing success/failure",
         "type": "timeseries"
       },
       {
