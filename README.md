@@ -15,8 +15,8 @@ docker exec -it rabbitmq rabbitmqctl set_policy TTL ".*" '{"message-ttl":60000}'
 
 ---
 ## to set up and run services: 
-- prerequisites: docker, docker-compose , python3 , go
-versions used in development: docker  27.2.0, docker-compose version v2.11.2, python3 version 3.12.5, go 1.23.1
+- prerequisites: docker, docker-compose , python , go
+- versions used in dev: docker  27.2.0, docker-compose version v2.11.2, python version 3.12.5, go 1.23.1
 ```
 docker-compose up
 ```
