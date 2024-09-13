@@ -10,9 +10,12 @@ docker exec -it rabbitmq rabbitmqctl set_policy TTL ".*" '{"message-ttl":60000}'
 
 # Parking Monitor / Duration Calculator
 
+## System Diagram
+![plot](systemdiagram.png)
+
 ---
-- prerequisites: docker, docker-compose, python3, go
 ## to set up and run services: 
+- prerequisites: docker, docker-compose, python3, go
 ```
 docker-compose up
 ```
@@ -50,7 +53,7 @@ pytest
 - focus has been on implementing processing logic and automating setup right up to dashboard.
 - sensitive config information need to be handled better in future version, right now they are seen in config files.
 - unit tests have been written only to cover core processing logic in the go backend and python rest api code. 
-- 
+- instrumentation for prometheus metrics collection has only been done in the go backend service
 
 
 
