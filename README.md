@@ -29,7 +29,7 @@ Once the containers are up and running
 
 2. dashboard for metrics event processing latency and event processing fail/success count http://localhost:3000/d/parking-metrics/parking-metrics?orgId=1
 
-
+3. go to ./output_files/log.txt to see file being written into parking logs
 
 ## to run unit tests 
 (tests made to cover core logic; coverage to be improved)
